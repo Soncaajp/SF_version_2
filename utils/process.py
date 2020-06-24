@@ -56,7 +56,7 @@ def score_dir(module, val_iter, config):
                                                               ('wd', 1e-6)
                                                               ))
 
-    train_metrics, val_metrics = Affectnet_valence_metrics(config)
+    train_metrics, val_metrics = Affectnet_metrics(config)
     save_model_prefix = config['save_model_prefix_template'].format(config['layers'], 'x'.join([str(a) for a in config['img_size']]))
     mxboard_dir = os.path.join('mxboard_logs',
                                str(datetime.datetime.now()).replace(' ', '_') + '_' + save_model_prefix.split('/')[-1])
@@ -109,7 +109,7 @@ def train_Affectnet(module, train_iter, val_iter, config):
         os.makedirs(mxboard_dir)
     sw = mxboard.SummaryWriter(logdir=mxboard_dir, flush_secs=5)
 
-    train_metrics, val_metrics = Affectnet_valence_metrics(config)
+    train_metrics, val_metrics = Affectnet_metrics(config)
 
     # train_iter.n_objects = 30
     for epoch in range(config['load_epoch'], 1000):
@@ -121,6 +121,7 @@ def train_Affectnet(module, train_iter, val_iter, config):
             if batch_id == 0:
                 sw.add_image('train_minibatch', batch.data[0].asnumpy(), epoch)
             module.forward(batch, is_train=True)  # compute predictions
+            # print(batch.label)
             for metric in train_metrics:
                 module.update_metric(metric, batch.label)  # accumulate prediction accuracy
                 # print(metric.get())
